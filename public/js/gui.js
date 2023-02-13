@@ -30,7 +30,7 @@ function main() {
 
     document.body.append(addDiv)
     document.getElementById("download-extension-link").addEventListener("click",()=>{
-        window.open("./AnkiTube.zip")
+        window.open("https://github.com/leonderdunna/AnkiTube")
     })
     document.getElementById("reload-link").addEventListener("click",()=>{
         location.reload()
