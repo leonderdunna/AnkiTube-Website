@@ -1,0 +1,14 @@
+body{
+    margin: 1cm;
+    padding: 1cm;
+    background: rgba(0,0,0,0.6);
+    border-radius: 20px;
+    color: white;
+}
+html{
+    background-image: linear-gradient(to left top, #4a2570, mediumpurple, #4a2570);
+    background-attachment: fixed;
+}
+a{
+    color: lightblue;
+}

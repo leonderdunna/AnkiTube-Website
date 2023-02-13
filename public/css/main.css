@@ -1,0 +1,119 @@
+html {
+    background-image: linear-gradient(to left top, #003700, #00a000, #003700);
+    color: lightcyan;
+    margin: 0;
+    height: 100vh;
+    background-attachment: fixed;
+}
+nav button{
+    margin: 0.15cm;
+    padding: 10px;
+    color: lightcyan;
+}
+
+body {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10cm,1fr));
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    justify-items: stretch;
+    align-items: stretch;
+    margin: 10px;
+}
+button:hover{
+    color: black;
+    background: green;
+}
+
+
+.add{
+    font-size: xxx-large;
+    text-align: center;
+    display: block;
+    width: 100%;
+
+    position: relative;
+    background: transparent;
+    margin:0;
+    padding:0;
+    color: white;
+    height: 100%;
+
+}
+button {
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: #918f8f;
+    border-radius: 8px;
+    margin-left: 5px;
+    padding: 5px
+}
+
+ul {
+    margin: 0;
+    padding-left: 8px;
+    position: relative;
+}
+li::marker{
+    content:none;
+}
+
+.deck {
+    background: rgba(0, 0, 0, 0.71);
+    border-radius: 8px;
+    margin: 0cm;
+    padding: 0.3cm;
+
+
+
+}
+
+.deck .deck {
+    margin: 0;
+    padding: 0.5rem 0.5rem 0rem 0.5rem;
+    background: transparent
+
+}
+
+.card-edit-main .anki-questions{
+    margin: 10px;
+}
+.card-edit-main input{
+
+
+    border-radius: 8px;
+    border: none;
+    padding: 10px;
+    margin: 2px;
+    width: 90%;
+    color: white;
+    background: rgba(0, 0, 0, 0.3);
+
+}
+.card-edit-main hr {
+    border:none;
+    height: 0.5px;
+    background: lightcyan;
+}
+.card-edit-main button{
+    margin: 0 0.3cm;
+}
+.card-edit-main h2{
+    display: inline;
+}
+.card-edit-main select {
+
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: #918f8f;
+    border-radius: 8px;
+    margin-left: 5px;
+    padding: 5px
+
+}
+iframe{
+    border: none;
+    border-radius: 8px;
+    aspect-ratio: 16/9;
+    width: 100%;
+}
