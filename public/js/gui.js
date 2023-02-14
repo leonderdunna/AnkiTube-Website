@@ -29,16 +29,16 @@ function main() {
     addDiv.append(addLabel)
 
     document.body.append(addDiv)
-    document.getElementById("download-extension-link").addEventListener("click",()=>{
+    document.getElementById("download-extension-link").addEventListener("click", () => {
         window.open("https://github.com/leonderdunna/AnkiTube")
     })
-    document.getElementById("reload-link").addEventListener("click",()=>{
+    document.getElementById("reload-link").addEventListener("click", () => {
         location.reload()
     })
-    document.getElementById("howto-link").addEventListener("click",()=>{
+    document.getElementById("howto-link").addEventListener("click", () => {
         window.open("./howto.html")
     })
-    document.getElementById("report-link").addEventListener("click",()=>{
+    document.getElementById("report-link").addEventListener("click", () => {
         window.open("https://github.com/leonderdunna/AnkiTube/issues")
     })
 
@@ -58,7 +58,77 @@ function main() {
 
 }
 
+function getVideoGrid(videos){
+    let vidGrid = document.createElement("div")
+    vidGrid.classList.add("vid-grid")
+
+    for(let video of videos){
+        vidGrid.append(getVideoPreview(video))
+    }
+
+    let add = document.createElement("button")
+    add.textContent = "Video Hinzufügen"
+    vidGrid.append(add)
+
+    return vidGrid
+
+}
+
+function getVideoPreview(video){
+    let vidGrid = document.createElement("div")
+    vidGrid.classList.add("vid")
+
+    let name = document.createElement("h2")
+    name.textContent = video.name;
+
+    let openButton = document.createElement("button")
+    openButton.textContent = "Öffnen"
+
+    let editButton = document.createElement("button")
+    editButton.textContent = "Bearbeiten"
+
+    vidGrid.append(name,editButton,openButton)
+
+
+
+    return vidGrid
+}
+
 function getDeckDiv(deck) {
+
+    let deckDiv = document.createElement("div")
+    let name = document.createElement("h2")
+    name.textContent = deck.name;
+    deckDiv.append(name)
+    if(deck.path.length>1) {
+        let path = document.createElement("button")
+        path.classList.add("path")
+        path.textContent = deck.path.join(" / ")
+        deckDiv.append(path)
+    }
+    let download = document.createElement("button")
+    download.textContent = "Herunterladen"
+    deckDiv.append(download)
+
+    let del = document.createElement("button")
+    del.textContent = "Löschen"
+    deckDiv.append(del)
+
+    let vidTitle = document.createElement("h3")
+    vidTitle.textContent = "Videos";
+    deckDiv.append(vidTitle)
+
+    deckDiv.append(getVideoGrid(deck.videos))
+
+    let decksTitle = document.createElement("h3")
+    decksTitle.textContent = "Decks"
+
+    deckDiv.append(decksTitle,getDeckListDiv(deck.children))
+
+    return deckDiv
+
+    // Legacy
+    /*
     let deckDiv = document.createElement("div")
     deckDiv.classList.add("deck", deck.uuid)
     let name = document.createElement("span")
@@ -187,8 +257,39 @@ function getDeckDiv(deck) {
 
     return deckDiv
 
-
+*/
 }
 
 
-main()
+function getDeckListDiv(decks) {
+    let decksDiv = document.createElement("div")
+    decksDiv.classList.add("decks-grid")
+    for (let deck of decks) {
+        let deckDiv = document.createElement("div")
+        deckDiv.classList.add("deck")
+        let deckName = document.createElement("h2")
+        deckName.textContent = deck.name;
+
+        let downloadButton = document.createElement("button")
+        downloadButton.textContent = "Herunterladen"
+        let editButton = document.createElement("button")
+        editButton.textContent = "Öffnen"
+
+        deckDiv.append(deckName, downloadButton, editButton)
+
+        decksDiv.append(deckDiv)
+    }
+    let add = document.createElement("button")
+    add.textContent="Deck Hinzufügen"
+    decksDiv.append(add)
+
+    return decksDiv;
+
+}
+
+function test() {
+    //document.body.append(getDeckListDiv([{name: "Mathe"},{name:"Informatik"},{name:"Datenbanken"},{name:"Programmieren"}]))
+    document.body.append(getDeckDiv(example_deck_structure.children[0]))
+}
+
+test()

@@ -5,21 +5,71 @@ html {
     height: 100vh;
     background-attachment: fixed;
 }
-nav button{
-    margin: 0.15cm;
-    padding: 10px;
-    color: lightcyan;
+body{
+    padding:0;
+    margin:0;
+}
+body > *:not(header){
+margin: 10px;
 }
 
-body {
+nav button, header h1{
+    margin: 5px;
+    padding: 10px;
+    color: lightcyan;
+    display: inline;
+}
+
+header {
+    border-bottom: 2px solid lightcyan;
+    display:block;
+}
+header h1{
+    top: 0.3rem;
+    position: relative;
+}
+
+header nav {
+    display:inline-block;
+    text-align: right;
+    position: relative;
+
+
+}
+
+
+
+.decks-grid, .vid-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10cm,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(8cm,1fr));
     grid-column-gap: 10px;
     grid-row-gap: 10px;
     justify-items: stretch;
     align-items: stretch;
     margin: 10px;
 }
+.decks-grid h2, .vid-grid h2{
+    margin-top: 0;
+}
+.path{
+    display: inline;
+    background: rgba(0,0,0,0.5);
+    border-radius: 8px;
+    padding: 5px;
+    margin: 3px;
+}
+
+.decks-grid .deck button , .vid-grid .vid button{
+    background: green;
+    color: lightcyan;
+    border-radius: 100vw;
+    padding: 0.6em;
+    float:right;
+}
+.decks-grid .deck button:hover {
+    background: darkGreen;
+}
+
 button:hover{
     color: black;
     background: green;
@@ -41,12 +91,14 @@ button:hover{
 
 }
 button {
+    display: inline;
     background: rgba(0,0,0,0.5);
-    border: none;
-    color: #918f8f;
     border-radius: 8px;
-    margin-left: 5px;
-    padding: 5px
+    padding: 5px;
+    margin: 3px;
+    color: lightcyan;
+    border:none;
+    font-size: 1rem;
 }
 
 ul {
@@ -58,7 +110,7 @@ li::marker{
     content:none;
 }
 
-.deck {
+.deck , .vid {
     background: rgba(0, 0, 0, 0.71);
     border-radius: 8px;
     margin: 0cm;

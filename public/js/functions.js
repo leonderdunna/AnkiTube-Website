@@ -196,22 +196,26 @@ let cards_ready = false
 let deck_struct = []
 const example_deck_structure = {
     name: "Informatik",
+    path: ["Informatik"],
     uuid: 12345,
-    ids: [],
+    videos: [],
     children: [{
         name: "Aussagenlogik",
+        path: ["Informatik", "Aussagenlogik"],
         uuid: 34567,
-        ids: ["2ITUIJhiRMQ"],
+        videos: [{id: "2ITUIJhiRMQ", name: "TestVideo"}],
         children: [{
             name: "alpharegeln",
+            path: ["Informatik", "Aussagenlogik", "Alpharegeln"],
             uuid: 2345,
             ids: [],
             children: []
         }]
     }, {
         name: "Prädikatenlogik",
+        path: ["Informatik", "Prädikatenlogik"],
         uuid: "ne",
-        ids: [],
+        videos: [],
         children: []
     }]
 }
@@ -298,7 +302,7 @@ function removeDeck(deck) {
             deck_struct.splice(deck_struct.indexOf(deck), 1)
             fetch(server.decks + d.uuid, {
                 method: "DELETE"
-            }).then(r => r.json()).then((res)=>{
+            }).then(r => r.json()).then((res) => {
                 console.log(res)
             })
         }
