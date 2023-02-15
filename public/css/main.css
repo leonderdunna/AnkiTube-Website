@@ -1,5 +1,6 @@
+
 html {
-    background-image: linear-gradient(to left top, #003700, #00a000, #003700);
+    background-image: linear-gradient(to left top, #002a00, green, #002a00);
     color: lightcyan;
     margin: 0;
     height: 100vh;
@@ -168,4 +169,6 @@ iframe{
     border-radius: 8px;
     aspect-ratio: 16/9;
     width: 100%;
+    float:left;
+    max-width: 20cm;
 }
