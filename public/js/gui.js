@@ -1,21 +1,21 @@
-function getVideoGrid(videos, parentDeckId) {
+ function getVideoGrid(videos, parentDeckId) {
     let vidGrid = document.createElement("div")
     vidGrid.classList.add("vid-grid")
 
     for (let video of videos) {
-        vidGrid.append(getVideoPreview(video))
+        vidGrid.append(getVideoPreview(video, parentDeckId))
     }
 
     let add = document.createElement("button")
     add.textContent = "Video Hinzufügen"
-    add.addEventListener("click", () => {
+    add.addEventListener("click", async () => {
         let name = prompt("Video Name")
         if (name == null || name === "") return
         let id = prompt("Video ID")
         if (id == null || id === "") return
         let video = {name: name, id: id}
-        addVideo(video, parentDeckId)
-        navigateToVideo(video, parentDeckId)
+        await addVideo(video, parentDeckId)
+        await navigateToVideo(video, parentDeckId)
     })
 
     vidGrid.append(add)
@@ -40,9 +40,9 @@ function getVideoPreview(video, deckId) {
 
     let del = document.createElement("button")
     del.textContent = "Löschen"
-    del.addEventListener("click",()=>{
-        removeVideo(video.id,deckId)
-        navigateToDeck(deckId)
+    del.addEventListener("click", async () => {
+        await removeVideo(video.id, deckId)
+        await navigateToDeck(deckId)
     })
 
     vidGrid.append(name, del, openButton)
@@ -50,53 +50,71 @@ function getVideoPreview(video, deckId) {
     return vidGrid
 }
 
+function getPathDiv(path) {
+    let pd = document.createElement("h2")
+    for (let p of path) {
+        let ps = document.createElement("span")
+        ps.textContent = path.indexOf(p) === path.length - 1 ? p.name : p.name + " / "
+        ps.classList.add("path-link")
+        ps.addEventListener("click", () => {
+            navigateToDeck(p.uuid)
+        })
+        pd.append(ps)
+    }
+    return pd
+}
+
 function getDeckPage(deck) {
+    console.log("startgetdeckPage",deck)
 
     let deckDiv = document.createElement("div")
-    let name = document.createElement("h2")
-    name.textContent = deck.path.join(" / ");
-    deckDiv.append(name)
+    deckDiv.append(getPathDiv(deck.path))
 
-
-    let move = document.createElement("button")
-    move.textContent = "Verschieben"
-    deckDiv.append(move)
-
+    /*  //Könnte man mal ergenzen. bin ich jetzt aber zu Faul und ist denke ich nichts so wichtig
+        let move = document.createElement("button")
+        move.textContent = "Verschieben"
+        deckDiv.append(move)
+    */
 
     let download = document.createElement("button")
     download.textContent = "Herunterladen"
-    download.addEventListener("click",async () => {
-        downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(deckStructureToCrowdAnki(await getDeckById(deck.uuid))))))
+    download.addEventListener("click", async () => {
+        downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(deckStructureToCrowdAnki(await getDeckById(deck.path.at(-1).uuid))))))
     })
     deckDiv.append(download)
 
     let del = document.createElement("button")
     del.textContent = "Löschen"
+    del.addEventListener("click", async () => {
+        await removeDeck(deck)
+        console.log("del", deck.path.at(-2))
+        deck.path.length > 1 ? await navigateToDeck(deck.path.at(-2).uuid) :await navigateToMain()
+    })
     deckDiv.append(del)
 
     let vidTitle = document.createElement("h3")
     vidTitle.textContent = "Videos";
     deckDiv.append(vidTitle)
 
-    deckDiv.append(getVideoGrid(deck.videos))
+    deckDiv.append(getVideoGrid(deck.videos, deck.path.at(-1).uuid))
 
     let decksTitle = document.createElement("h3")
     decksTitle.textContent = "Decks"
 
-    deckDiv.append(decksTitle, getDeckGrid(deck.children, deck.uuid))
+    deckDiv.append(decksTitle, getDeckGrid(deck.children.map(e => getDeckById(e)), deck.path))
 
     return deckDiv
 
 }
 
-function getDeckGrid(decks, parentDeckId) {
+function getDeckGrid(decks, path) {
     let decksDiv = document.createElement("div")
     decksDiv.classList.add("decks-grid")
     for (let deck of decks) {
         let deckDiv = document.createElement("div")
         deckDiv.classList.add("deck")
         let deckName = document.createElement("h2")
-        deckName.textContent = deck.name;
+        deckName.textContent = deck.path.at(-1).name;
 
         let downloadButton = document.createElement("button")
         downloadButton.textContent = "Herunterladen"
@@ -105,15 +123,16 @@ function getDeckGrid(decks, parentDeckId) {
 
 
         //CLICK LISTENERS
-        editButton.addEventListener("click", () => {
-            navigateToDeck(deck.uuid).then()
+        editButton.addEventListener("click", async () => {
+            await navigateToDeck(deck.path.at(-1).uuid)
         })
         downloadButton.addEventListener("click", async () => {
+            //TODO Download enthält glaube ich noch keine karten lol
             console.log(deck)
             downloadFile(makeTextFile(
                 JSON.stringify(makeDeckBaseDeck(
                     deckStructureToCrowdAnki(
-                        await getDeckById(deck.uuid))))))
+                        await getDeckById(deck.path.at(-1).uuid))))))
         })
 
         deckDiv.append(deckName, downloadButton, editButton)
@@ -123,11 +142,13 @@ function getDeckGrid(decks, parentDeckId) {
     let add = document.createElement("button")
     add.textContent = "Deck Hinzufügen"
 
-    add.addEventListener("click", () => {
-        let newDeckId = createDeck(prompt("Deck Name"))
-        if (parentDeckId != null)
-            addChild(newDeckId, parentDeckId)
-        navigateToDeck(newDeckId)
+    add.addEventListener("click", async () => {
+        let name = prompt("Deck Name")
+        if (name == null || name === "") return
+        let newDeckId = await createDeck(name, path)
+        if (path.length > 0)
+            await addChild(newDeckId, path.at(-1).uuid)
+        await navigateToDeck(newDeckId)
     })
 
     decksDiv.append(add)
@@ -136,7 +157,7 @@ function getDeckGrid(decks, parentDeckId) {
 
 }
 
-function getVideoPage(video, parentDeckId) {
+async function getVideoPage(video, parentDeckId) {
 
     let back = document.createElement("button")
     back.textContent = "Zurück"
@@ -151,13 +172,23 @@ function getVideoPage(video, parentDeckId) {
     let videoId = document.createElement("span")
     videoId.textContent = "id: " + video.id
     let cards = document.createElement("div")
-    cards.append(...getCardsByVideoId(video.id).map(e => getCardComponent(e)))
+    console.log(await getCardsByVideoId(video.id))
+    cards.append(...await getCardsByVideoId(video.id).then(r => r.map(e => getCardComponent(e))))
 
     let add = document.createElement("button")
     add.textContent = "Neue Karte"
 
+    let select = document.createElement("select")
+    let options = [{name: "Lückentext", value: "Cloze"}, {name: "Standard", value: "Basic"}].map((e) => {
+        let o = document.createElement("option")
+        o.textContent = e.name;
+        o.value = e.value;
+        return o
+    })
+    select.append(...options)
 
-    videoPage.append(videoTitle, videoId, back, document.createElement("br"), vid, cards, add)
+
+    videoPage.append(videoTitle, videoId, back, document.createElement("br"), vid, cards, add, select)
     return videoPage
 
 }
@@ -165,6 +196,7 @@ function getVideoPage(video, parentDeckId) {
 function getCardComponent(card) {
 
     let cardComponent = document.createElement("div")
+    cardComponent.classList.add("card")
     let fields = []
 
     if (card.type === "Basic") {
@@ -198,7 +230,7 @@ function getCardComponent(card) {
 }
 
 function test() {
-    //navigateToDeck("asödlfkj").then()
+    //navigateToVideo("asödlfkj")
 }
 
 function clearPage() {
@@ -208,34 +240,38 @@ function clearPage() {
 }
 
 async function navigateToMain() {
+
     let deckList = await getDeckList()
     clearPage()
-    let grid = getDeckGrid(deckList)
+    let grid = getDeckGrid(deckList, [])
     grid.classList.add("page")
     document.body.append(grid)
     console.log("→ Main")
 }
 
 async function navigateToDeck(id) {
+    await aktualisieren(true, false)
     clearPage()
-    let deck = await getDeckById(id)
+    let deck = getDeckById(id)
     let page = getDeckPage(deck)
     page.classList.add("page")
     document.body.append(page)
     console.log("→ Deck: " + id)
 }
 
+
 async function navigateToVideo(video, parentDeckId) {
+    await aktualisieren(false, true)
     clearPage()
-    let vid = getVideoPage(video, parentDeckId)
+    let vid = await getVideoPage(video, parentDeckId)
     vid.classList.add("page")
     document.body.append(vid)
     console.log("→ Video: " + video.id)
 }
 
-function init() {
+async function init() {
     document.querySelector("h1").addEventListener("click", navigateToMain)
-    navigateToMain();
+    await navigateToMain();
 }
 
 init()

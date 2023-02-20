@@ -6,32 +6,39 @@ html {
     height: 100vh;
     background-attachment: fixed;
 }
-body{
-    padding:0;
-    margin:0;
-}
-body > *:not(header){
-margin: 10px;
+
+body {
+    padding: 0;
+    margin: 0;
 }
 
-nav button, header h1{
+body > *:not(header) {
+    margin: 10px;
+}
+
+nav button, header h1 {
     margin: 5px;
     padding: 10px;
     color: lightcyan;
     display: inline;
 }
 
+h1:hover {
+    text-decoration: underline;
+}
+
 header {
     border-bottom: 2px solid lightcyan;
-    display:block;
+    display: block;
 }
-header h1{
+
+header h1 {
     top: 0.3rem;
     position: relative;
 }
 
 header nav {
-    display:inline-block;
+    display: inline-block;
     text-align: right;
     position: relative;
 
@@ -39,45 +46,51 @@ header nav {
 }
 
 
-
 .decks-grid, .vid-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(8cm,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(8cm, 1fr));
     grid-column-gap: 10px;
     grid-row-gap: 10px;
     justify-items: stretch;
     align-items: stretch;
     margin: 10px;
 }
-.decks-grid h2, .vid-grid h2{
+
+.decks-grid h2, .vid-grid h2 {
     margin-top: 0;
 }
-.path{
+
+.path {
     display: inline;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 5px;
     margin: 3px;
 }
 
-.decks-grid .deck button , .vid-grid .vid button{
+.path-link:hover {
+    text-decoration: underline;
+}
+
+.decks-grid .deck button, .vid-grid .vid button {
     background: green;
     color: lightcyan;
     border-radius: 100vw;
     padding: 0.6em;
-    float:right;
+    float: right;
 }
+
 .decks-grid .deck button:hover {
     background: darkGreen;
 }
 
-button:hover{
+button:hover {
     color: black;
     background: green;
 }
 
 
-.add{
+.add {
     font-size: xxx-large;
     text-align: center;
     display: block;
@@ -85,20 +98,21 @@ button:hover{
 
     position: relative;
     background: transparent;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
     color: white;
     height: 100%;
 
 }
+
 button {
     display: inline;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 5px;
     margin: 3px;
     color: lightcyan;
-    border:none;
+    border: none;
     font-size: 1rem;
 }
 
@@ -107,16 +121,16 @@ ul {
     padding-left: 8px;
     position: relative;
 }
-li::marker{
-    content:none;
+
+li::marker {
+    content: none;
 }
 
-.deck , .vid {
+.deck, .vid {
     background: rgba(0, 0, 0, 0.71);
     border-radius: 8px;
     margin: 0cm;
     padding: 0.3cm;
-
 
 
 }
@@ -128,47 +142,60 @@ li::marker{
 
 }
 
-.card-edit-main .anki-questions{
+.card-edit-main .anki-questions {
     margin: 10px;
 }
-.card-edit-main input{
+
+.card {
+    margin: 0.5cm;
+}
 
 
+.card input {
     border-radius: 8px;
     border: none;
     padding: 10px;
     margin: 2px;
-    width: 90%;
+    max-width: 90%;
+
+    width: 10cm;
     color: white;
     background: rgba(0, 0, 0, 0.3);
 
 }
+
 .card-edit-main hr {
-    border:none;
+    border: none;
     height: 0.5px;
     background: lightcyan;
 }
-.card-edit-main button{
+
+.card-edit-main button {
     margin: 0 0.3cm;
 }
-.card-edit-main h2{
+
+.card-edit-main h2 {
     display: inline;
 }
-.card-edit-main select {
 
-    background: rgba(0,0,0,0.5);
+select {
+
+    background: rgba(0, 0, 0, 0.5);
     border: none;
-    color: #918f8f;
+    color: lightcyan;
     border-radius: 8px;
     margin-left: 5px;
-    padding: 5px
+    padding: 5px;
+    font-size: 1rem;
 
 }
-iframe{
+
+iframe {
     border: none;
     border-radius: 8px;
     aspect-ratio: 16/9;
     width: 100%;
-    float:left;
-    max-width: 20cm;
+    float: left;
+    max-width: min(20cm, 90%);
+    margin: 0.5cm;
 }
