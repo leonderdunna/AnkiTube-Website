@@ -217,7 +217,14 @@ async function saveCard(card) {
 
 
 async function addVideo(video, parentDeckId) {
-    //TODO
+
+
+    //Test ID
+    if(video.id.includes("v="))
+        video.id = video.id.match(/v=([^&]*)/)[1]
+
+    console.log(video.id)
+
     let d = getDeckById(parentDeckId)
     d.videos.push(video)
     await saveDeck(d)
@@ -227,7 +234,7 @@ async function downloadAll() {
     await aktualisieren(true, true)
     let ca = getEmptyCrowdAnkiDeck("AnkiTube Imports " + new Date().toString(), allDecksUuid)
     for (let deck of deck_struct.filter(e => e.path.length <= 1)) {
-        ca.children.push(deckStructureToCrowdAnki(deck))
+        ca.children.push(await deckStructureToCrowdAnki(deck))
     }
     downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(ca))))
 
@@ -309,19 +316,18 @@ function cardToNote(card) {
     return note
 }
 
-function deckStructureToCrowdAnki(deck) {
+async function deckStructureToCrowdAnki(deck) {
 
     let ca = getEmptyCrowdAnkiDeck(deck.path.at(-1).name, deck.path.at(-1).uuid)
 
     for (let vid of deck.videos) {
-        let notes = cards.filter((e) => {
-            return e.deck_id === vid.id;
-        }).map(e => cardToNote(e))
-        ca.notes.push(...notes)
+        let notes = await getCardsByVideoId(vid.id)
+        ca.notes.push(...notes.map(e => cardToNote(e)))
     }
     for (let childID of deck.children) {
-        ca.children.push(deckStructureToCrowdAnki(getDeckById(childID)))
+        ca.children.push(await deckStructureToCrowdAnki(getDeckById(childID)))
     }
+    console.log(ca)
     return ca
 
 }
@@ -351,7 +357,7 @@ function downloadFile(filePath) {
     //Kopiert von:https://stackoverflow.com/questions/1066452/easiest-way-to-open-a-download-window-without-navigating-away-from-the-page
     let link = document.createElement('a');
     link.href = filePath;
-    link.download = "Deck.json";
+    link.download = "deck.json";
     link.click();
 }
 
