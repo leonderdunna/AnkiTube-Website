@@ -1,4 +1,4 @@
- function getVideoGrid(videos, parentDeckId) {
+function getVideoGrid(videos, parentDeckId) {
     let vidGrid = document.createElement("div")
     vidGrid.classList.add("vid-grid")
 
@@ -65,7 +65,7 @@ function getPathDiv(path) {
 }
 
 function getDeckPage(deck) {
-    console.log("startgetdeckPage",deck)
+    console.log("startgetdeckPage", deck)
 
     let deckDiv = document.createElement("div")
     deckDiv.append(getPathDiv(deck.path))
@@ -88,7 +88,7 @@ function getDeckPage(deck) {
     del.addEventListener("click", async () => {
         await removeDeck(deck)
         console.log("del", deck.path.at(-2))
-        deck.path.length > 1 ? await navigateToDeck(deck.path.at(-2).uuid) :await navigateToMain()
+        deck.path.length > 1 ? await navigateToDeck(deck.path.at(-2).uuid) : await navigateToMain()
     })
     deckDiv.append(del)
 
@@ -167,6 +167,8 @@ async function getVideoPage(video, parentDeckId) {
     let videoPage = document.createElement("div")
     let videoTitle = document.createElement("h2")
     let vid = document.createElement("iframe")
+
+
     vid.src = "https://www.youtube.com/embed/" + video.id
     videoTitle.textContent = video.name
     let videoId = document.createElement("span")
@@ -186,6 +188,11 @@ async function getVideoPage(video, parentDeckId) {
         return o
     })
     select.append(...options)
+
+    add.addEventListener("click", () => {
+        //TODO
+        cards.append(getCardComponent(newCard(select.value, video.id)))
+    })
 
 
     videoPage.append(videoTitle, videoId, back, document.createElement("br"), vid, cards, add, select)
@@ -207,12 +214,33 @@ function getCardComponent(card) {
         a.placeholder = "Antwort"
         a.value = card.answer
 
+        q.addEventListener("change", () => {
+            card.question = q.value;
+
+            saveCard(card).then()
+
+        })
+        a.addEventListener("change", () => {
+            card.answer = a.value;
+
+            saveCard(card).then()
+
+        })
+
+
         fields.push(q, document.createElement("br"), a)
     }
     if (card.type === "Cloze") {
         let t = document.createElement("input")
         t.placeholder = "{{c1::Lückentext}}"
         t.value = card.text
+
+        t.addEventListener("change", () => {
+            card.text = t.value;
+
+            saveCard(card)
+
+        })
 
         fields.push(t)
     }

@@ -184,27 +184,6 @@ let test_deck_struct = [
         "children": []
     }]
 
-const example_deck_structure = {
-    name: "Informatik",
-    path: ["Informatik"],
-    uuid: 12345,
-    videos: [{id: "2ITUIJhiRMQ", name: "TestVideo"}],
-    children: [{
-        name: "Aussagenlogik",
-        path: ["Informatik", "Aussagenlogik"],
-        uuid: 34567,
-        videos: [{id: "2ITUIJhiRMQ", name: "TestVideo"}],
-        children: [{
-            name: "alpharegeln",
-            path: ["Informatik", "Aussagenlogik", "Alpharegeln"],
-            uuid: 2345,
-            videos: [],
-            children: []
-        }]
-    }, {
-        name: "Prädikatenlogik", path: ["Informatik", "Prädikatenlogik"], uuid: "ne", videos: [], children: []
-    }]
-}
 const server = {
     //cards: "https://139-162-135-50.ip.linodeusercontent.com:80/card/",
     //decks: "https://139-162-135-50.ip.linodeusercontent.com:80/deck/",f
@@ -225,6 +204,18 @@ async function saveDeck(deck) {
 
 }
 
+async function saveCard(card) {
+    let r = await fetch(server.cards, {
+        method: "POST", headers: {
+            "Accept": "application/jaon",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(card)
+    }).then(r => r.json())
+    console.log(r)
+}
+
+
 async function addVideo(video, parentDeckId) {
     //TODO
     let d = getDeckById(parentDeckId)
@@ -239,6 +230,22 @@ async function downloadAll() {
         ca.children.push(deckStructureToCrowdAnki(deck))
     }
     downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(ca))))
+
+}
+
+function newCard(type,vid_id) {
+    let c = {
+        type: type,
+        id: "AnkiTube-Website-" + Math.random(),
+        deck_id: vid_id
+    }
+    if (type === "Cloze")
+        c.text = "";
+    if (type === "Basic") {
+        c.answer = "";
+        c.question = "";
+    }
+    return c
 
 }
 
@@ -262,7 +269,10 @@ function getEmptyCrowdAnkiDeck(name, uuid) {
 }
 
 async function getCardsByVideoId(id) {
-    return await fetch(server.cards + id).then(r => r.json())
+    let r =  await fetch(server.cards + id).then(r => r.json())
+    console.log("getCardsByvidId",r,id)
+    return r
+
 }
 
 async function removeVideo(vidID, deckID) {
@@ -361,7 +371,7 @@ async function removeDeck(deck) {
     await fetch(server.decks + deck.path.at(-1).uuid, {method: "DELETE"})
 
     if (deck.path.length > 1) {
-       await removeChild(deck.path.at(-1).uuid, getDeckById(deck.path.at(-2).uuid))
+        await removeChild(deck.path.at(-1).uuid, getDeckById(deck.path.at(-2).uuid))
 
     }
 
@@ -379,7 +389,7 @@ async function removeChild(childID, deck) {
 
 
 async function getDeckList() {
-    await aktualisieren(true,false)
+    await aktualisieren(true, false)
     return deck_struct.filter(e => e.path.length === 1)
 }
 
