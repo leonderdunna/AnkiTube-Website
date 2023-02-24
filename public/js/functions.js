@@ -127,69 +127,16 @@ const deck_configurations = [{
     "timer": 0
 }]
 const deck_config_uuid = "58b6fa76-a586-11ed-a34c-9bbd37c88a3c"
-const example_cards = [
-    {
-        "_id": "63e80265ab7b5ef8326690cf",
-        "id": "anki-addon-5889320815654693",
-        "deck_id": "2ITUIJhiRMQ",
-        "type": "Basic",
-        "question": "Was macht Substitution in der Prädikatenlogik?",
-        "answer": "\\( S = \\{ x \\Rightarrow s,y \\Rightarrow t \\} \\) <br /> diese Substitution \\( S \\) ersetzt in einer Formel, alle freien \\( x \\) und \\(y\\) durch \\(s\\) und \\(t\\)",
-        "time": 0,
-        "__v": 0
-    }, {
-        "_id": "63e80510ab7b5ef8326690e7",
-        "id": "anki-addon-3647871503801243",
-        "deck_id": "2ITUIJhiRMQ",
-        "type": "Basic",
-        "question": "Was bedeutet \"Kollisionsfreiheit\" in Bezug auf Substitutionen in  der Prädikatenlogik?",
-        "answer": "Es existieren keine freien Variablen, auf die die Substitution abbildet.",
-        "time": 0,
-        "__v": 0
-    }]
-let cards = []
+
 
 let deck_struct = []
-let test_deck_struct = [
-    {
-        "path": [{"name": "Informatik", "uuid": 12345}],
-        "videos": [{"id": "2ITUIJhiRMQ", "name": "TestVideo"}],
-        "children": [0.14823029756437367, 0.418341933906744, 0.9691239255238973]
-    }, {
-        "name": "Prädikatenlogik",
-        "path": [{"name": "Informatik", "uuid": 12345}, {"name": "Prädikatenlogik", "uuid": 0.14823029756437367}],
-        "uuid": 0.14823029756437367,
-        "videos": [],
-        "children": []
-    }, {
-        "name": "Aussagenlogik",
-        "path": [{"name": "Informatik", "uuid": 12345}, {"name": "Aussagenlogik", "uuid": 0.418341933906744}],
-        "uuid": 0.418341933906744,
-        "videos": [],
-        "children": []
-    }, {
-        "name": "Test",
-        "path": [{"name": "Informatik", "uuid": 12345}, {"name": "Test", "uuid": 0.9691239255238973}],
-        "uuid": 0.9691239255238973,
-        "videos": [],
-        "children": [0.2045287673159022]
-    }, {
-        "name": "Mehr Test",
-        "path": [{"name": "Informatik", "uuid": 12345}, {"name": "Test", "uuid": 0.9691239255238973}, {
-            "name": "Mehr Test",
-            "uuid": 0.2045287673159022
-        }],
-        "uuid": 0.2045287673159022,
-        "videos": [],
-        "children": []
-    }]
 
 const server = {
-    //cards: "https://139-162-135-50.ip.linodeusercontent.com:80/card/",
-    //decks: "https://139-162-135-50.ip.linodeusercontent.com:80/deck/",f
+    cards: "https://139-162-135-50.ip.linodeusercontent.com:80/card/",
+    decks: "https://139-162-135-50.ip.linodeusercontent.com:80/deck/",
 
-    decks: "http://localhost:3000/deck/",
-    cards: "http://localhost:3000/card/",
+    //decks: "http://localhost:3000/deck/",
+    //cards: "http://localhost:3000/card/",
 }
 const allDecksUuid = "AnkiTube-Imports" + Date.now()
 
@@ -215,12 +162,16 @@ async function saveCard(card) {
     console.log(r)
 }
 
+async function removeCard(card) {
+    let r = await fetch(server.cards + card.id, {method: "DELETE"}).then(r => r.json())
+    console.log(r)
+}
 
 async function addVideo(video, parentDeckId) {
 
 
     //Test ID
-    if(video.id.includes("v="))
+    if (video.id.includes("v="))
         video.id = video.id.match(/v=([^&]*)/)[1]
 
     console.log(video.id)
@@ -240,7 +191,7 @@ async function downloadAll() {
 
 }
 
-function newCard(type,vid_id) {
+function newCard(type, vid_id) {
     let c = {
         type: type,
         id: "AnkiTube-Website-" + Math.random(),
@@ -276,8 +227,8 @@ function getEmptyCrowdAnkiDeck(name, uuid) {
 }
 
 async function getCardsByVideoId(id) {
-    let r =  await fetch(server.cards + id).then(r => r.json())
-    console.log("getCardsByvidId",r,id)
+    let r = await fetch(server.cards + id).then(r => r.json())
+    console.log("getCardsByvidId", r, id)
     return r
 
 }
@@ -354,8 +305,7 @@ async function addChild(childId, parentId) {
 }
 
 function downloadFile(filePath) {
-    //Kopiert von:https://stackoverflow.com/questions/1066452/easiest-way-to-open-a-download-window-without-navigating-away-from-the-page
-    let link = document.createElement('a');
+   let link = document.createElement('a');
     link.href = filePath;
     link.download = "deck.json";
     link.click();
@@ -401,7 +351,7 @@ async function getDeckList() {
 
 function getDeckById(id) {
     //TODO
-    let deck = deck_struct.filter((e) => e.path.at(-1).uuid === id)[0]
+    let deck = deck_struct.filter((e) => e.path.at(-1).uuid + "" === id + "")[0]
 
     console.log("getDeckById", id, deck, deck_struct)
 

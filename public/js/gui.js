@@ -247,6 +247,10 @@ function getCardComponent(card) {
 
     let del = document.createElement("button")
     del.textContent = "Löschen"
+    del.addEventListener("click", async () => {
+        cardComponent.remove();
+        await removeCard(card)
+    })
 
     let fieldsComp = document.createElement("div")
     fieldsComp.append(...fields)
@@ -268,6 +272,11 @@ function clearPage() {
 }
 
 async function navigateToMain() {
+    let params = new URLSearchParams(window.location.search)
+    params.delete("page")
+    params.delete("id")
+    history.replaceState(null, null, "/?" + params.toString())
+
 
     let deckList = await getDeckList()
     clearPage()
@@ -279,8 +288,19 @@ async function navigateToMain() {
 
 async function navigateToDeck(id) {
     await aktualisieren(true, false)
+
+    console.log("search", window.location.search)
+    let params = new URLSearchParams(window.location.search)
+    params.set("page", "deck")
+    params.set("id", id)
+    history.replaceState(null, null, "/?" + params.toString())
+
     clearPage()
     let deck = getDeckById(id)
+    if(deck === undefined){
+        alert("Deck nicht gefunden")
+        await navigateToMain()
+    }
     let page = getDeckPage(deck)
     page.classList.add("page")
     document.body.append(page)
@@ -298,8 +318,12 @@ async function navigateToVideo(video, parentDeckId) {
 }
 
 async function init() {
+
     document.querySelector("h1").addEventListener("click", navigateToMain)
-    await navigateToMain();
+    let params = new URLSearchParams(window.location.search)
+    if (params.get("page") === "deck")
+        await navigateToDeck(params.get("id"))
+    else await navigateToMain()
 }
 
 init()
