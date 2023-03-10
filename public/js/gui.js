@@ -1,21 +1,21 @@
-function getVideoGrid(videos, parentDeckId) {
+function getStapelGrid(stapel, parentDeckId) {
     let vidGrid = document.createElement("div")
     vidGrid.classList.add("vid-grid")
 
-    for (let video of videos) {
-        vidGrid.append(getVideoPreview(video, parentDeckId))
+    for (let s of stapel) {
+        vidGrid.append(getStapelPreview(s, parentDeckId))
     }
 
     let add = document.createElement("button")
-    add.textContent = "Video Hinzufügen"
+    add.textContent = "Stapel Hinzufügen"
     add.addEventListener("click", async () => {
-        let name = prompt("Video Name")
+        let name = prompt("Stapel Name")
         if (name == null || name === "") return
-        let id = prompt("Video ID")
-        if (id == null || id === "") return
-        let video = {name: name, id: id}
-        await addVideo(video, parentDeckId)
-        await navigateToVideo(video, parentDeckId)
+        let link = prompt("Website Link (optional)")
+
+        let stapel = generateStapel(name, link)
+        await addStapel(stapel, parentDeckId)
+        await navigateToStapel(stapel, parentDeckId)
     })
 
     vidGrid.append(add)
@@ -24,24 +24,24 @@ function getVideoGrid(videos, parentDeckId) {
 
 }
 
-function getVideoPreview(video, deckId) {
+function getStapelPreview(stapel, deckId) {
     let vidGrid = document.createElement("div")
     vidGrid.classList.add("vid")
 
     let name = document.createElement("h2")
-    name.textContent = video.name;
+    name.textContent = stapel.name;
 
     let openButton = document.createElement("button")
     openButton.textContent = "Öffnen"
     openButton.addEventListener("click", () => {
-        navigateToVideo(video, deckId)
+        navigateToStapel(stapel, deckId)
     })
 
 
     let del = document.createElement("button")
     del.textContent = "Löschen"
     del.addEventListener("click", async () => {
-        await removeVideo(video.id, deckId)
+        await removeStapel(stapel.id, deckId)
         await navigateToDeck(deckId)
     })
 
@@ -64,7 +64,7 @@ function getPathDiv(path) {
     return pd
 }
 
-function getDeckPage(deck) {
+async function getDeckPage(deck) {
     console.log("startgetdeckPage", deck)
 
     let deckDiv = document.createElement("div")
@@ -93,21 +93,22 @@ function getDeckPage(deck) {
     deckDiv.append(del)
 
     let vidTitle = document.createElement("h3")
-    vidTitle.textContent = "Videos";
+    vidTitle.textContent = "Stapel";
     deckDiv.append(vidTitle)
 
-    deckDiv.append(getVideoGrid(deck.videos, deck.path.at(-1).uuid))
+    deckDiv.append(getStapelGrid(deck.stapel, deck.path.at(-1).uuid))
 
     let decksTitle = document.createElement("h3")
     decksTitle.textContent = "Decks"
 
-    deckDiv.append(decksTitle, getDeckGrid(deck.children.map(e => getDeckById(e)), deck.path))
+    deckDiv.append(decksTitle, await getDeckGrid(await Promise.all( deck.children.map(async e => await getDeckById(e))), deck.path))
 
     return deckDiv
 
 }
 
 function getDeckGrid(decks, path) {
+    console.log("getGrid",decks,path)
     let decksDiv = document.createElement("div")
     decksDiv.classList.add("decks-grid")
     for (let deck of decks) {
@@ -157,25 +158,40 @@ function getDeckGrid(decks, path) {
 
 }
 
-async function getVideoPage(video, parentDeckId) {
+async function getStapelPage(stapel, parentDeckId) {
 
     let back = document.createElement("button")
     back.textContent = "Zurück"
     back.addEventListener("click", () => {
         navigateToDeck(parentDeckId)
     })
-    let videoPage = document.createElement("div")
-    let videoTitle = document.createElement("h2")
-    let vid = document.createElement("iframe")
+    let stapelPage = document.createElement("div")
+    let stapelTitle = document.createElement("h2")
 
 
-    vid.src = "https://www.youtube.com/embed/" + video.id
-    videoTitle.textContent = video.name
-    let videoId = document.createElement("span")
-    videoId.textContent = "id: " + video.id
+    let site;
+    if (stapel.type !=="none") {
+        site = document.createElement("iframe")
+        let id = stapel.id.replaceAll("[__]","/")
+
+        if (stapel.type === "youtube")
+            site.src = "https://www.youtube.com/embed/" + id
+        if (stapel.type === "odysee")
+            site.src = "https://odysee.com/$/embed/" + id + "?r=9EqVxCnfSEaYxDvcsTVkbmqTjt24F2ti"
+        if (stapel.type === "web")
+            site.src = id;
+        if (stapel.type === "ipfs") {
+            site.src ="ipfs://"+ id;
+        }
+
+    } else site = ""
+
+    stapelTitle.textContent = stapel.name
+    let stapelId = document.createElement("span")
+    stapelId.textContent = "id: " + stapel.id
     let cards = document.createElement("div")
-    console.log(await getCardsByVideoId(video.id))
-    cards.append(...await getCardsByVideoId(video.id).then(r => r.map(e => getCardComponent(e))))
+    console.log(await getCardsByStapelId(stapel.id))
+    cards.append(...await getCardsByStapelId(stapel.id).then(r => r.map(e => getCardComponent(e))))
 
     let add = document.createElement("button")
     add.textContent = "Neue Karte"
@@ -191,12 +207,12 @@ async function getVideoPage(video, parentDeckId) {
 
     add.addEventListener("click", () => {
         //TODO
-        cards.append(getCardComponent(newCard(select.value, video.id)))
+        cards.append(getCardComponent(newCard(select.value, stapel.id)))
     })
 
 
-    videoPage.append(videoTitle, videoId, back, document.createElement("br"), vid, cards, add, select)
-    return videoPage
+    stapelPage.append(stapelTitle, stapelId, back, document.createElement("br"), site, cards, add, select)
+    return stapelPage
 
 }
 
@@ -262,7 +278,7 @@ function getCardComponent(card) {
 }
 
 function test() {
-    //navigateToVideo("asödlfkj")
+    //navigateToStapel("asödlfkj")
 }
 
 function clearPage() {
@@ -275,6 +291,7 @@ async function navigateToMain() {
     let params = new URLSearchParams(window.location.search)
     params.delete("page")
     params.delete("id")
+    //TODO wieder anstellen
     history.replaceState(null, null, "/?" + params.toString())
 
 
@@ -287,34 +304,35 @@ async function navigateToMain() {
 }
 
 async function navigateToDeck(id) {
-    await aktualisieren(true, false)
 
     console.log("search", window.location.search)
     let params = new URLSearchParams(window.location.search)
     params.set("page", "deck")
     params.set("id", id)
+    //TODO wieder anstellenf
     history.replaceState(null, null, "/?" + params.toString())
 
     clearPage()
-    let deck = getDeckById(id)
-    if(deck === undefined){
+    let deck = await getDeckById(id)
+
+    if (deck === undefined) {
         alert("Deck nicht gefunden")
         await navigateToMain()
     }
-    let page = getDeckPage(deck)
+    let page = await getDeckPage(deck)
     page.classList.add("page")
     document.body.append(page)
     console.log("→ Deck: " + id)
 }
 
 
-async function navigateToVideo(video, parentDeckId) {
-    await aktualisieren(false, true)
+async function navigateToStapel(stapel, parentDeckId) {
+
     clearPage()
-    let vid = await getVideoPage(video, parentDeckId)
+    let vid = await getStapelPage(stapel, parentDeckId)
     vid.classList.add("page")
     document.body.append(vid)
-    console.log("→ Video: " + video.id)
+    console.log("→ Stapel: " + stapel.id)
 }
 
 async function init() {

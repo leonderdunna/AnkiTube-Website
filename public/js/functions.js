@@ -86,7 +86,7 @@ const note_models = [
         "type": 1,
         "vers": []
     }]
-let main_textFile = null
+let main_textFile
 const deck_configurations = [{
     "__type__": "DeckConfig",
     "autoplay": true,
@@ -128,9 +128,6 @@ const deck_configurations = [{
 }]
 const deck_config_uuid = "58b6fa76-a586-11ed-a34c-9bbd37c88a3c"
 
-
-let deck_struct = []
-
 const server = {
     cards: "https://139-162-135-50.ip.linodeusercontent.com:80/card/",
     decks: "https://139-162-135-50.ip.linodeusercontent.com:80/deck/",
@@ -139,6 +136,12 @@ const server = {
     //cards: "http://localhost:3000/card/",
 }
 const allDecksUuid = "AnkiTube-Imports" + Date.now()
+
+async function getDecks() {
+    let r = await fetch(server.decks).then(r => r.json())
+    console.log("getDecks", r)
+    return r
+}
 
 async function saveDeck(deck) {
     let r = await fetch(server.decks, {
@@ -167,35 +170,37 @@ async function removeCard(card) {
     console.log(r)
 }
 
-async function addVideo(video, parentDeckId) {
+async function addStapel(stapel, parentDeckId) {
 
 
+    console.log(stapel)
     //Test ID
-    if (video.id.includes("v="))
-        video.id = video.id.match(/v=([^&]*)/)[1]
+    if (stapel.id.includes("v="))
+        stapel.id = stapel.id.match(/v=([^&]*)/)[1]
 
-    console.log(video.id)
+    console.log(stapel.id)
 
-    let d = getDeckById(parentDeckId)
-    d.videos.push(video)
+    let d = await getDeckById(parentDeckId)
+    console.log(d)
+    d.stapel.push(stapel)
     await saveDeck(d)
 }
 
 async function downloadAll() {
-    await aktualisieren(true, true)
+
     let ca = getEmptyCrowdAnkiDeck("AnkiTube Imports " + new Date().toString(), allDecksUuid)
-    for (let deck of deck_struct.filter(e => e.path.length <= 1)) {
+    for (let deck of await getDecks().filter(e => e.path.length <= 1)) {
         ca.children.push(await deckStructureToCrowdAnki(deck))
     }
     downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(ca))))
 
 }
 
-function newCard(type, vid_id) {
+function newCard(type, stapel_id) {
     let c = {
         type: type,
         id: "AnkiTube-Website-" + Math.random(),
-        deck_id: vid_id
+        deck_id: stapel_id
     }
     if (type === "Cloze")
         c.text = "";
@@ -207,12 +212,6 @@ function newCard(type, vid_id) {
 
 }
 
-async function aktualisieren(decks, cards) {
-    if (decks !== false)
-        deck_struct = await fetch(server.decks).then(r => r.json())
-    if (cards !== false)
-        cards = await fetch(server.cards).then(r => r.json())
-}
 
 function getEmptyCrowdAnkiDeck(name, uuid) {
     return {
@@ -226,20 +225,46 @@ function getEmptyCrowdAnkiDeck(name, uuid) {
     }
 }
 
-async function getCardsByVideoId(id) {
+async function getCardsByStapelId(id) {
     let r = await fetch(server.cards + id).then(r => r.json())
-    console.log("getCardsByvidId", r, id)
+    console.log("getCardsBystapelId", r, id)
     return r
 
 }
 
-async function removeVideo(vidID, deckID) {
-    console.log(deckID, vidID)
-    let deck = getDeckById(deckID)
-    let vids = deck.videos
-    let vidIds = vids.map(e => e.id)
-    console.log(vidIds, deck, vids)
-    vids.splice(vidIds.indexOf(vidID), 1)
+function generateStapel(name, link) {
+    let stapel;
+    if ([null, undefined, ""].includes(link))
+        stapel = {name: name, id: (Math.random() + "").substring(2), type: "none"}
+
+    else if (link.includes("youtube.com/watch?v="))
+        stapel = {name: name, id: link.match(/v=([^&]*)/)[1], type: "youtube"}
+
+    else if (link.includes("youtu.be/"))
+        stapel = {name: name, id: link.match(/be\/([^?\/]*)/)[1], type: "youtube"}
+
+    else if (link.includes("odysee.com"))
+        stapel = {name: name, id: link.match(/odysee.com\/([^?]*)/)[1], type: "odysee"}
+
+    else if (link.includes("ipfs://"))
+        stapel = {name: name, id: link.match(/ipfs:\/\/([^?\/]*)/)[1], type: "ipfs"}
+
+
+    else
+        stapel = {name: name, id: link, type: "web"}
+
+    stapel.id = stapel.id.replaceAll("/","[__]")
+    return stapel
+
+}
+
+async function removeStapel(stapelID, deckID) {
+    console.log(deckID, stapelID)
+    let deck = await getDeckById(deckID)
+    let stapels = deck.stapel
+    let stapelIds = stapels.map(e => e.id)
+    console.log(stapelIds, deck, stapels)
+    stapels.splice(stapelIds.indexOf(stapelID), 1)
     console.log(deck)
     await saveDeck(deck)
 
@@ -271,8 +296,8 @@ async function deckStructureToCrowdAnki(deck) {
 
     let ca = getEmptyCrowdAnkiDeck(deck.path.at(-1).name, deck.path.at(-1).uuid)
 
-    for (let vid of deck.videos) {
-        let notes = await getCardsByVideoId(vid.id)
+    for (let stapel of deck.stapel) {
+        let notes = await getCardsBystapelId(stapel.id)
         ca.notes.push(...notes.map(e => cardToNote(e)))
     }
     for (let childID of deck.children) {
@@ -289,8 +314,8 @@ async function createDeck(name, path) {
     let uuid = Math.random()
     path = path.map(e => e)
     path.push({name: name, uuid: uuid})
-    let deck = {name: name, path: path, uuid: uuid, videos: [], children: []}
-    deck_struct.push(deck)
+    let deck = {name: name, path: path, uuid: uuid, stapel: [], children: []}
+
 
     await saveDeck(deck)
     return (deck.uuid)
@@ -299,13 +324,13 @@ async function createDeck(name, path) {
 async function addChild(childId, parentId) {
     //TODO
 
-    let d = getDeckById(parentId)
+    let d = await getDeckById(parentId)
     d.children.push(childId)
     await saveDeck(d)
 }
 
 function downloadFile(filePath) {
-   let link = document.createElement('a');
+    let link = document.createElement('a');
     link.href = filePath;
     link.download = "deck.json";
     link.click();
@@ -327,7 +352,7 @@ async function removeDeck(deck) {
     await fetch(server.decks + deck.path.at(-1).uuid, {method: "DELETE"})
 
     if (deck.path.length > 1) {
-        await removeChild(deck.path.at(-1).uuid, getDeckById(deck.path.at(-2).uuid))
+        await removeChild(deck.path.at(-1).uuid, await getDeckById(deck.path.at(-2).uuid))
 
     }
 
@@ -335,6 +360,7 @@ async function removeDeck(deck) {
 }
 
 async function removeChild(childID, deck) {
+    console.log("rc", childID, deck)
     let c = [...deck.children]
     console.log("bevore removechild", childID, c, deck.children.indexOf(childID))
 
@@ -345,16 +371,13 @@ async function removeChild(childID, deck) {
 
 
 async function getDeckList() {
-    await aktualisieren(true, false)
-    return deck_struct.filter(e => e.path.length === 1)
+    return await getDecks().then(r => r.filter(e => e.path.length === 1))
 }
 
-function getDeckById(id) {
-    //TODO
-    let deck = deck_struct.filter((e) => e.path.at(-1).uuid + "" === id + "")[0]
+async function getDeckById(id) {
 
-    console.log("getDeckById", id, deck, deck_struct)
+    let r = await fetch(server.decks + id).then(r => r.json())
 
-    return deck
+    return r[0]
 }
 
