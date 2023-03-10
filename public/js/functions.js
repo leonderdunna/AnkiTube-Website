@@ -251,7 +251,7 @@ function generateStapel(name, link) {
 
 
     else
-        stapel = {name: name, id: link, type: "web"}
+        stapel = {name: name, id: link.replaceAll("&",""), type: "web"}
 
     stapel.id = stapel.id.replaceAll("/","[__]")
     return stapel
