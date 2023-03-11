@@ -79,7 +79,7 @@ async function getDeckPage(deck) {
     let download = document.createElement("button")
     download.textContent = "Herunterladen"
     download.addEventListener("click", async () => {
-        downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(deckStructureToCrowdAnki(await getDeckById(deck.path.at(-1).uuid))))))
+        downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(await deckStructureToCrowdAnki(await getDeckById(deck.path.at(-1).uuid))))))
     })
     deckDiv.append(download)
 
@@ -101,14 +101,14 @@ async function getDeckPage(deck) {
     let decksTitle = document.createElement("h3")
     decksTitle.textContent = "Decks"
 
-    deckDiv.append(decksTitle, await getDeckGrid(await Promise.all( deck.children.map(async e => await getDeckById(e))), deck.path))
+    deckDiv.append(decksTitle, await getDeckGrid(await Promise.all(deck.children.map(async e => await getDeckById(e))), deck.path))
 
     return deckDiv
 
 }
 
 function getDeckGrid(decks, path) {
-    console.log("getGrid",decks,path)
+    console.log("getGrid", decks, path)
     let decksDiv = document.createElement("div")
     decksDiv.classList.add("decks-grid")
     for (let deck of decks) {
@@ -132,7 +132,7 @@ function getDeckGrid(decks, path) {
             console.log(deck)
             downloadFile(makeTextFile(
                 JSON.stringify(makeDeckBaseDeck(
-                    deckStructureToCrowdAnki(
+                    await deckStructureToCrowdAnki(
                         await getDeckById(deck.path.at(-1).uuid))))))
         })
 
@@ -170,9 +170,9 @@ async function getStapelPage(stapel, parentDeckId) {
 
 
     let site;
-    if (stapel.type !=="none") {
+    if (stapel.type !== "none") {
         site = document.createElement("iframe")
-        let id = stapel.id.replaceAll("[__]","/")
+        let id = stapel.id.replaceAll("[__]", "/")
 
         if (stapel.type === "youtube")
             site.src = "https://www.youtube.com/embed/" + id
@@ -181,7 +181,7 @@ async function getStapelPage(stapel, parentDeckId) {
         if (stapel.type === "web")
             site.src = id;
         if (stapel.type === "ipfs") {
-            site.src ="ipfs://"+ id;
+            site.src = "ipfs://" + id;
         }
 
     } else site = ""
@@ -300,7 +300,7 @@ async function navigateToMain() {
     let grid = getDeckGrid(deckList, [])
     grid.classList.add("page")
     document.body.append(grid)
-    console.log("→ Main")
+    //console.log("→ Main")
 }
 
 async function navigateToDeck(id) {

@@ -189,7 +189,7 @@ async function addStapel(stapel, parentDeckId) {
 async function downloadAll() {
 
     let ca = getEmptyCrowdAnkiDeck("AnkiTube Imports " + new Date().toString(), allDecksUuid)
-    for (let deck of await getDecks().filter(e => e.path.length <= 1)) {
+    for (let deck of await getDecks().then(r => r.filter(e => e.path.length <= 1))) {
         ca.children.push(await deckStructureToCrowdAnki(deck))
     }
     downloadFile(makeTextFile(JSON.stringify(makeDeckBaseDeck(ca))))
@@ -294,14 +294,15 @@ function cardToNote(card) {
 
 async function deckStructureToCrowdAnki(deck) {
 
-    let ca = getEmptyCrowdAnkiDeck(deck.path.at(-1).name, deck.path.at(-1).uuid)
+    console.log("dstc",deck)
+    let ca = getEmptyCrowdAnkiDeck(deck.path.at(-1).name, deck.path.at(-1).uuid + "")
 
     for (let stapel of deck.stapel) {
-        let notes = await getCardsBystapelId(stapel.id)
+        let notes = await getCardsByStapelId(stapel.id)
         ca.notes.push(...notes.map(e => cardToNote(e)))
     }
     for (let childID of deck.children) {
-        ca.children.push(await deckStructureToCrowdAnki(getDeckById(childID)))
+        ca.children.push(await deckStructureToCrowdAnki(await getDeckById(childID)))
     }
     console.log(ca)
     return ca
