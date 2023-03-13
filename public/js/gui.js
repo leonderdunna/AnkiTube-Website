@@ -313,7 +313,7 @@ async function navigateToMain() {
     params.delete("page")
     params.delete("id")
     //TODO wieder anstellen
-    //history.replaceState(null, null, "/?" + params.toString())
+    history.replaceState(null, null, "/?" + params.toString())
 
 
     let deckList = await getDeckList()
@@ -331,7 +331,7 @@ async function navigateToDeck(id) {
     params.set("page", "deck")
     params.set("id", id)
     //TODO wieder anstellenf
-    //history.replaceState(null, null, "/?" + params.toString())
+    history.replaceState(null, null, "/?" + params.toString())
 
     clearPage()
     let deck = await getDeckById(id)
