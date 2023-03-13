@@ -151,7 +151,7 @@ li::marker {
 }
 
 
-.card input {
+.card input, .card textarea {
     border-radius: 8px;
     border: none;
     padding: 10px;
@@ -195,7 +195,7 @@ iframe {
     border-radius: 8px;
     aspect-ratio: 16/9;
     width: 100%;
-    float: left;
+
     max-width: min(20cm, 90%);
     margin: 0.5cm;
 }

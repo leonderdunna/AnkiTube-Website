@@ -168,6 +168,24 @@ async function getStapelPage(stapel, parentDeckId) {
     let stapelPage = document.createElement("div")
     let stapelTitle = document.createElement("h2")
 
+    let siteDiv = document.createElement("div")
+    let showSite = document.createElement("input")
+    showSite.name = "showSite"
+    showSite.id = "showSite"
+    let showLabl = document.createElement("label")
+    showLabl.for = "showSite"
+    showLabl.textContent = "Material anzeigen"
+    showSite.type = "checkbox"
+
+    showSite.addEventListener("change",()=>{
+        let box = document.querySelector("#showSite")
+        if(box.checked){
+            siteDiv.append(site)
+        } else{
+            site.remove()
+        }
+    })
+
 
     let site;
     if (stapel.type !== "none") {
@@ -185,6 +203,9 @@ async function getStapelPage(stapel, parentDeckId) {
         }
 
     } else site = ""
+
+    site.id="site"
+    siteDiv.append(showSite,showLabl, document.createElement("br"))
 
     stapelTitle.textContent = stapel.name
     let stapelId = document.createElement("span")
@@ -211,7 +232,7 @@ async function getStapelPage(stapel, parentDeckId) {
     })
 
 
-    stapelPage.append(stapelTitle, stapelId, back, document.createElement("br"), site, cards, add, select)
+    stapelPage.append(stapelTitle, stapelId, back, siteDiv,document.createElement("br"), cards, add, select)
     return stapelPage
 
 }
@@ -226,7 +247,7 @@ function getCardComponent(card) {
         let q = document.createElement("input")
         q.placeholder = "Frage"
         q.value = card.question
-        let a = document.createElement("input")
+        let a = document.createElement("textarea")
         a.placeholder = "Antwort"
         a.value = card.answer
 
@@ -247,7 +268,7 @@ function getCardComponent(card) {
         fields.push(q, document.createElement("br"), a)
     }
     if (card.type === "Cloze") {
-        let t = document.createElement("input")
+        let t = document.createElement("textarea")
         t.placeholder = "{{c1::Lückentext}}"
         t.value = card.text
 
@@ -292,7 +313,7 @@ async function navigateToMain() {
     params.delete("page")
     params.delete("id")
     //TODO wieder anstellen
-    history.replaceState(null, null, "/?" + params.toString())
+    //history.replaceState(null, null, "/?" + params.toString())
 
 
     let deckList = await getDeckList()
@@ -310,7 +331,7 @@ async function navigateToDeck(id) {
     params.set("page", "deck")
     params.set("id", id)
     //TODO wieder anstellenf
-    history.replaceState(null, null, "/?" + params.toString())
+    //history.replaceState(null, null, "/?" + params.toString())
 
     clearPage()
     let deck = await getDeckById(id)
